@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vaigai AI - Waste Management Assistant</title>
+    <meta name="description"
+        content="AI-powered waste management assistant for municipalities, citizens, and industries.">
+
+    <!-- PWA Manifest & App Icons -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#15803d">
+    <link rel="apple-touch-icon"
+        href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48dGV4dCB5PSIuOWVtIiBmb250LXNpemU9IjkwIj7wn4y/PC90ZXh0Pjwvc3ZnPg==">
+
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="logo-container">
+                <div class="logo-icon">🌿</div>
+                <h2>Vaigai AI</h2>
+            </div>
+            <ul class="nav-links">
+                <li><button class="nav-btn active" data-target="classifier">Waste Classifier</button></li>
+                <li><button class="nav-btn" data-target="report">Report Issue</button></li>
+                <li><button class="nav-btn" data-target="dashboard">Dashboard</button></li>
+                <li><button class="nav-btn" data-target="tips">Eco-Tips</button></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-header">
+                <div class="header-content-wrapper">
+                    <div>
+                        <h1 id="page-title">Waste Classifier</h1>
+                        <p id="page-subtitle">Identify waste types and get safe disposal guidance.</p>
+                    </div>
+                </div>
+            </header>
+
+            <!-- API Key Warning Banner -->
+            <div id="api-key-banner" class="banner warning-banner">
+                <div class="banner-content">
+                    <span class="banner-icon">🔑</span>
+                    <div>
+                        <strong>API Key Required:</strong> To use real AI classification, please enter your Google
+                        Gemini API Key.
+                    </div>
+                </div>
+                <div class="banner-action">
+                    <input type="password" id="gemini-api-key" placeholder="Enter Gemini API Key..." class="api-input">
+                    <button id="save-key-btn" class="secondary-btn">Save Key</button>
+                </div>
+            </div>
+
+            <div class="views-container">
+
+                <!-- Waste Classifier View -->
+                <section id="classifier" class="view active-view">
+                    <div class="card glass">
+                        <h3>What do you want to dispose of?</h3>
+
+                        <!-- NEW: Image Upload Area -->
+                        <div class="upload-area" id="drop-zone">
+                            <input type="file" id="file-input" accept="image/*" class="hidden">
+                            <div class="upload-prompt" id="upload-prompt">
+                                <span class="upload-icon">📷</span>
+                                <p>Drag & drop an image here or <span class="text-primary cursor-pointer"
+                                        onclick="document.getElementById('file-input').click()">browse files</span></p>
+                                <p class="text-sm">Upload a photo of the waste item to classify it with AI.</p>
+                            </div>
+                            <div class="image-preview-container hidden" id="image-preview-container">
+                                <img id="image-preview" src="" alt="Waste Preview">
+                                <button id="remove-image-btn" class="icon-btn remove-btn">✖</button>
+                            </div>
+                        </div>
+
+                        <div class="input-divider">OR TYPE A DESCRIPTION</div>
+
+                        <div class="input-group">
+                            <input type="text" id="waste-input"
+                                placeholder="e.g., Banana peel, Old laptop, Medical syringe..." autocomplete="off">
+                            <button id="classify-btn" class="primary-btn">Classify with AI</button>
+                        </div>
+
+                        <!-- NEW: Loading State -->
+                        <div id="loading-state" class="loading-container hidden">
+                            <div class="spinner"></div>
+                            <p>Vaigai AI is analyzing the waste...</p>
+                        </div>
+
+                        <div id="classification-result" class="result-box hidden">
+                            <div class="result-header">
+                                <span class="badge" id="category-badge">Category</span>
+                                <h4 id="waste-name">Item Name</h4>
+                            </div>
+                            <div class="guidance">
+                                <h5>Safe Disposal Guidance:</h5>
+                                <p id="disposal-text">Guidance goes here.</p>
+                            </div>
+                            <div class="risks" id="risk-container">
+                                <h5>Risks of improper disposal:</h5>
+                                <p id="risk-text">Risk details.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Report Issue View -->
+                <section id="report" class="view hidden-view">
+                    <div class="card glass">
+                        <h3>Report an Environmental Issue</h3>
+                        <form id="report-form">
+                            <div class="form-group">
+                                <label for="issue-type">Issue Type</label>
+                                <select id="issue-type" required>
+                                    <option value="" disabled selected>Select an issue...</option>
+                                    <option value="illegal_dumping">Illegal Dumping</option>
+                                    <option value="water_pollution">Water Pollution</option>
+                                    <option value="uncleared_waste">Uncleared Waste bin</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="location">Location / Landmark</label>
+                                <input type="text" id="location" placeholder="Enter street name or landmark" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="description">Description (Optional)</label>
+                                <textarea id="description" rows="3" placeholder="Additional details..."></textarea>
+                            </div>
+                            <button type="submit" class="primary-btn submit-btn">Submit Report to Authorities</button>
+                        </form>
+                        <div id="report-success" class="success-message hidden">
+                            ✅ Report successfully submitted to local municipal authorities!
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Dashboard View -->
+                <section id="dashboard" class="view hidden-view">
+                    <div class="dashboard-grid">
+                        <div class="stat-card glass">
+                            <h4>Active Reports</h4>
+                            <div class="stat-value">12</div>
+                            <p class="stat-trend increase">↑ 2 from yesterday</p>
+                        </div>
+                        <div class="stat-card glass">
+                            <h4>Collection Efficiency</h4>
+                            <div class="stat-value">84%</div>
+                            <p class="stat-trend increase">↑ 5% this week</p>
+                        </div>
+                        <div class="stat-card glass">
+                            <h4>Critical Incidents</h4>
+                            <div class="stat-value text-danger">3</div>
+                            <p class="stat-label">Water pollution reports</p>
+                        </div>
+                    </div>
+
+                    <div class="card glass mt-4">
+                        <h3>Recent Reports & Route Optimization</h3>
+                        <ul class="report-list" id="dashboard-reports">
+                            <li class="report-item">
+                                <div class="report-info">
+                                    <span class="report-type tag-warning">Illegal Dumping</span>
+                                    <strong>MG Road Junction</strong>
+                                </div>
+                                <span class="report-time">2 hours ago</span>
+                            </li>
+                            <li class="report-item">
+                                <div class="report-info">
+                                    <span class="report-type tag-danger">Uncleared Waste</span>
+                                    <strong>Anna Nagar, Sector 4</strong>
+                                </div>
+                                <span class="report-time">5 hours ago</span>
+                            </li>
+                        </ul>
+                        <div class="optimization-tip">
+                            <h5>💡 Route Optimization Suggestion</h5>
+                            <p>Prioritize collection truck Route B (Anna Nagar -> MG Road) to clear high-priority
+                                delayed bins and inspect illegal dumping sites efficiently.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Eco-Tips View -->
+                <section id="tips" class="view hidden-view">
+                    <div class="tips-grid">
+                        <div class="tip-card glass">
+                            <div class="tip-icon">♻️</div>
+                            <h4>Compost at Home</h4>
+                            <p>Turn your vegetable peels and food scraps into nutrient-rich soil. It reduces landfill
+                                dependency by up to 30%!</p>
+                        </div>
+                        <div class="tip-card glass">
+                            <div class="tip-icon">🪫</div>
+                            <h4>E-Waste Safety</h4>
+                            <p>Never throw batteries or electronics in the regular trash. They leak toxic chemicals.
+                                Hand them over to certified e-waste recyclers.</p>
+                        </div>
+                        <div class="tip-card glass">
+                            <div class="tip-icon">🛍️</div>
+                            <h4>Say No to Single-Use</h4>
+                            <p>Carry a reusable cloth bag and water bottle. Simple habits drastically minimize plastic
+                                pollution in local water bodies.</p>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    }, err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
+</body>
+
+</html>
